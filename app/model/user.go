@@ -3,19 +3,28 @@ package model
 import (
 	"errors"
 	"go-im/app/appInit"
+	"time"
+
+	"github.com/jinzhu/gorm"
+	"github.com/rs/xid"
 )
 
 type User struct {
-	Id       int64  `gorm:"pk autoincr bigint(64)" form:"id" json:"id"`
-	Mobile   string `gorm:"varchar(20)" form:"mobile" json:"mobile"`
-	Passwd   string `gorm:"varchar(40)" form:"passwd" json:"-"` // 用户密码 md5(passwd + salt)
-	Avatar   string `gorm:"varchar(150)" form:"avatar" json:"avatar"`
-	Sex      string `gorm:"varchar(2)" form:"sex" json:"sex"`
-	Nickname string `gorm:"varchar(20)" form:"nickname" json:"nickname"`
-	Salt     string `gorm:"varchar(10)" form:"salt" json:"-"`
-	Online   int    `gorm:"int(10)" form:"online" json:"online"`   //是否在线
-	Token    string `gorm:"varchar(40)" form:"token" json:"token"` //用户鉴权
-	Memo     string `gorm:"varchar(140)" form:"memo" json:"memo"`
+	Id       string    `form:"id" json:"id"`
+	Mobile   string    `form:"mobile" json:"mobile"`
+	Passwd   string    `form:"passwd" json:"-"` // 用户密码 md5(passwd + salt)
+	Avatar   string    `form:"avatar" json:"avatar"`
+	Sex      string    `form:"sex" json:"sex"`
+	Nickname string    `form:"nickname" json:"nickname"`
+	Salt     string    `form:"salt" json:"-"`
+	Online   int       `form:"online" json:"online"` //是否在线
+	Token    string    `form:"token" json:"token"`   //用户鉴权
+	Memo     string    `form:"memo" json:"memo"`
+	Createat time.Time `form:"createat" json:"createat"` // 创建时间
+}
+
+func (u *User) BeforeCreate(scope *gorm.Scope) error {
+	return scope.SetColumn("id", xid.New().String())
 }
 
 //检查是否已注册过该手机号
@@ -35,7 +44,7 @@ func (u *User) ExistUserByMobile() (exists bool, err error) {
 		return
 	}
 
-	if u.ID != "" {
+	if u.Id != "" {
 		exists = true
 		err = nil
 		return
@@ -54,9 +63,63 @@ func (u *User) Create() (err error) {
 
 func (u *User) Get() (err error) {
 	err = appInit.DB.
-		Model(u).
-		Where("id = ?", u.Id)
-	First(u).
+		Where("id = ?", u.Id).
+		First(u).
 		Error
 	return
+}
+
+func (u *User) GetByName() (err error) {
+	err = appInit.DB.
+		Where("mobile = ?", u.Mobile).
+		First(u).
+		Error
+
+	return
+}
+
+func (u *User) Update(where, update map[string]interface{}) (err error) {
+	err = appInit.DB.
+		Where("id = ?", u.Id).
+		Where(where).
+		Updates(update).
+		Error
+
+	return
+}
+
+func FindInUsers(inUsers []string) (users []*User, err error) {
+	err = appInit.DB.
+		Where("id in (?)", inUsers).
+		Find(&users).
+		Error
+
+	return
+}
+
+func (u *User) List(rawQuery string, rawOrder string, offset int, limit int) ([]*User, int, error) {
+	users := make([]*User, 0)
+	total := 0
+
+	db := appInit.DB
+
+	db, err := buildWhere(rawQuery, db)
+	if err != nil {
+		return users, total, err
+	}
+
+	db, err = buildOrder(rawOrder, db)
+	if err != nil {
+		return users, total, err
+	}
+
+	db.Order("createat desc").
+		Count(&total).
+		Offset(offset).
+		Limit(limit).
+		Find(&users)
+
+	err = db.Error
+
+	return users, total, err
 }

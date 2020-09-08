@@ -2,9 +2,9 @@ package service
 
 import (
 	"errors"
-	"fastIM/app/util"
 	"fmt"
 	"go-im/app/model"
+	"go-im/app/util"
 	"math/rand"
 	"time"
 )
@@ -50,9 +50,9 @@ func (us *UserService) Login(mobile, plainpwd string) (user model.User, err erro
 		exists bool
 	)
 
-	u.Mobile = mobile
+	user.Mobile = mobile
 
-	exists, err = u.ExistUserByMobile()
+	exists, err = user.ExistUserByMobile()
 	if err != nil {
 		return
 	}
@@ -63,20 +63,28 @@ func (us *UserService) Login(mobile, plainpwd string) (user model.User, err erro
 	}
 
 	//判断密码是否正确
-	if !util.ValidatePasswd(plainpwd, loginUser.Salt, loginUser.Passwd) {
-		return loginUser, errors.New("密码不正确")
+	if !util.ValidatePasswd(plainpwd, user.Salt, user.Passwd) {
+		return user, errors.New("密码不正确")
 	}
 	//刷新用户登录的token值
 	token := util.GenRandomStr(32)
-	loginUser.Token = token
-	model.DbEngine.ID(loginUser.Id).Cols("token").Update(&loginUser)
+	user.Token = token
+	where := map[string]interface{}{
+		"id": user.Id,
+	}
+
+	update := map[string]interface{}{
+		"token": token,
+	}
+
+	err = user.Update(where, update)
 
 	//返回新用户信息
-	return loginUser, nil
+	return user, err
 }
 
 //查找某个用户
-func (s *UserService) Find(userId int64) (user model.User, err error) {
+func (s *UserService) Find(userId string) (user model.User, err error) {
 	user.Id = userId
 	err = user.Get()
 	return

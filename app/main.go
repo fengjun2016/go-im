@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fastIM/app/controller"
+	"go-im/app/handler"
 	"html/template"
 	"net/http"
 
@@ -24,15 +24,15 @@ func registerView() {
 
 func main() {
 
-	http.HandleFunc("/user/login", controller.UserLogin)
-	http.HandleFunc("/user/register", controller.UserRegister)
-	http.HandleFunc("/contact/addfriend", controller.AddFriend)
-	http.HandleFunc("/contact/loadfriend", controller.LoadFriend)
-	http.HandleFunc("/contact/loadcommunity", controller.LoadCommunity)
-	http.HandleFunc("/contact/createcommunity", controller.CreateCommunity)
-	http.HandleFunc("/contact/joincommunity", controller.JoinCommunity)
-	http.HandleFunc("/chat", controller.Chat)
-	http.HandleFunc("/attach/upload", controller.FileUpload)
+	http.HandleFunc("/user/login", handler.UserLogin)
+	http.HandleFunc("/user/register", handler.UserRegister)
+	http.HandleFunc("/contact/addfriend", handler.AddFriend)
+	http.HandleFunc("/contact/loadfriend", handler.LoadFriend)
+	http.HandleFunc("/contact/loadcommunity", handler.LoadCommunity)
+	http.HandleFunc("/contact/createcommunity", handler.CreateCommunity)
+	http.HandleFunc("/contact/joincommunity", handler.JoinCommunity)
+	// http.HandleFunc("/chat", handler.Chat)
+	http.HandleFunc("/attach/upload", handler.FileUpload)
 
 	http.Handle("/asset/", http.FileServer(http.Dir("../")))
 	http.Handle("/resource/", http.FileServer(http.Dir("../")))

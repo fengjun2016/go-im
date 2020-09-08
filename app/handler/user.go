@@ -2,9 +2,12 @@ package handler
 
 import (
 	"go-im/app/model"
+	"go-im/app/service"
 	"go-im/app/util"
 	"net/http"
 )
+
+var userService service.UserService
 
 func UserRegister(rw http.ResponseWriter, req *http.Request) {
 	var (
@@ -12,8 +15,8 @@ func UserRegister(rw http.ResponseWriter, req *http.Request) {
 		err error
 	)
 
-	util.Bind(request, &u)
-	u, err = UserService.UserRegister(u.Mobile, u.Passwd, u.Nickname, u.Avatar, u.Sex)
+	util.Bind(req, &u)
+	u, err = userService.UserRegister(u.Mobile, u.Passwd, u.Nickname, u.Avatar, u.Sex)
 	if err != nil {
 		util.RespFail(rw, err.Error())
 	} else {
@@ -29,15 +32,15 @@ func UserLogin(rw http.ResponseWriter, req *http.Request) {
 		err      error
 	)
 
-	mobile = request.PostForm.Get("mobile")
-	plainPwd = request.PostForm.Get("passwd")
+	mobile = req.PostForm.Get("mobile")
+	plainPwd = req.PostForm.Get("passwd")
 
 	//校验参数
 	if len(mobile) == 0 || len(plainPwd) == 0 {
 		util.RespFail(rw, "用户名或者密码不正确")
 	}
 
-	u, err = UserService.Login(mobile, plainPwd)
+	u, err = userService.Login(mobile, plainPwd)
 	if err != nil {
 		util.RespFail(rw, err.Error())
 	} else {
