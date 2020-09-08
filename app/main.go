@@ -31,7 +31,7 @@ func main() {
 	http.HandleFunc("/contact/loadcommunity", handler.LoadCommunity)
 	http.HandleFunc("/contact/createcommunity", handler.CreateCommunity)
 	http.HandleFunc("/contact/joincommunity", handler.JoinCommunity)
-	// http.HandleFunc("/chat", handler.Chat)
+	http.HandleFunc("/chat", handler.Chat)
 	http.HandleFunc("/attach/upload", handler.FileUpload)
 
 	http.Handle("/asset/", http.FileServer(http.Dir("../")))

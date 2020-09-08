@@ -9,18 +9,18 @@ import (
 	"net/http"
 )
 
-var concatService service.ContactService
+var contactService service.ContactService
 
 //添加朋友
 func AddFriend(writer http.ResponseWriter, request *http.Request) {
 	var arg args.AddNewMember
 	util.Bind(request, &arg)
-	friend, err := concatService.SearchFriendByName(arg.DstName)
+	friend, err := contactService.SearchFriendByName(arg.DstName)
 	if friend.Id == "" || err != nil {
 		util.RespFail(writer, "您要添加的好友不存在")
 	} else {
 		//调用service
-		err := concatService.AddFriend(arg.Userid, friend.Id)
+		err := contactService.AddFriend(arg.Userid, friend.Id)
 		if err != nil {
 			util.RespFail(writer, err.Error())
 		} else {
@@ -33,7 +33,7 @@ func AddFriend(writer http.ResponseWriter, request *http.Request) {
 func LoadFriend(writer http.ResponseWriter, request *http.Request) {
 	var arg args.ContactArg
 	util.Bind(request, &arg)
-	users, err := concatService.SearchFriend(arg.Userid)
+	users, err := contactService.SearchFriend(arg.Userid)
 	if err != nil {
 		util.RespFail(writer, err.Error())
 		return
@@ -46,7 +46,7 @@ func CreateCommunity(w http.ResponseWriter, req *http.Request) {
 	var arg model.Community
 	//如果这个用的上,那么可以直接
 	util.Bind(req, &arg)
-	com, err := concatService.CreateCommunity(arg)
+	com, err := contactService.CreateCommunity(arg)
 	if err != nil {
 		util.RespFail(w, err.Error())
 	} else {
@@ -60,12 +60,12 @@ func JoinCommunity(w http.ResponseWriter, req *http.Request) {
 	//如果这个用的上,那么可以直接
 	util.Bind(req, &arg)
 	//查看群是否存在
-	com, err := concatService.SearchCommunityByName(arg.DstName)
+	com, err := contactService.SearchCommunityByName(arg.DstName)
 	if com.Id == "" || err != nil {
 		util.RespFail(w, "您要加入的群不存在")
 	} else {
 		log.Printf("community id:%d", com.Id)
-		err := concatService.JoinCommunity(arg.Userid, com.Id)
+		err := contactService.JoinCommunity(arg.Userid, com.Id)
 		//刷新用户的群组信息 todo
 		// AddGroupId(arg.Userid, com.Id)
 		if err != nil {
@@ -81,7 +81,7 @@ func LoadCommunity(w http.ResponseWriter, req *http.Request) {
 	var arg args.ContactArg
 	//如果这个用的上,那么可以直接
 	util.Bind(req, &arg)
-	comunitys, err := concatService.SearchComunity(arg.Userid)
+	comunitys, err := contactService.SearchComunity(arg.Userid)
 	if err != nil {
 		util.RespFail(w, err.Error())
 		return
