@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
@@ -96,7 +97,7 @@ func Chat(rw http.ResponseWriter, req *http.Request) {
 
 	//检查是否协议升级成功
 	if err != nil {
-		logrus.Println("upgeade error ", err.Error())
+		logrus.Println("upgrade error ", err.Error())
 		return
 	}
 
@@ -123,6 +124,10 @@ func Chat(rw http.ResponseWriter, req *http.Request) {
 
 	//开启协程完成接收逻辑
 	go recvproc(node)
+
+	//心跳包检测
+	//启动一个协程，每隔1s向客户端发送一次心跳消息
+	go heartbeat(node)
 
 	sendMsg(userId, []byte("welcome!"))
 }
@@ -160,6 +165,14 @@ func sendproc(node *Node) {
 				return
 			}
 		}
+	}
+}
+
+//向每个客户端发送心跳包
+func heartbeat(node *Node) {
+	for {
+		node.DataQueue <- []byte("heartbeat")
+		time.Sleep(1 * time.Second)
 	}
 }
 

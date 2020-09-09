@@ -55,6 +55,7 @@
                         } else {
                             var url = "/index.shtml?id=" + res.data.id
                                 + "&token=" + res.data.token
+                            // mui.toast(res.data)
                             userInfo(res.data)
                             userId(res.data.id)
                             location.href = url

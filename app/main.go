@@ -1,7 +1,9 @@
 package main
 
 import (
+	"go-im/app/appInit"
 	"go-im/app/handler"
+	"go-im/app/migrate"
 	"html/template"
 	"net/http"
 
@@ -23,6 +25,15 @@ func registerView() {
 }
 
 func main() {
+
+	//读取配置文件
+	appInit.InitConfig()
+
+	//初始化数据库连接
+	appInit.InitDB()
+
+	//自动建表
+	migrate.CreateTable()
 
 	http.HandleFunc("/user/login", handler.UserLogin)
 	http.HandleFunc("/user/register", handler.UserRegister)

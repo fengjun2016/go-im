@@ -53,6 +53,7 @@ func (c *Contact) Update(where, update map[string]interface{}) (err error) {
 }
 
 func CheckFriendRelationShip(ownId, dstId string) (friend *Contact, err error) {
+	friend = new(Contact)
 	err = appInit.DB.
 		Where("ownerid = ?", ownId).
 		Where("dstobj = ?", dstId).

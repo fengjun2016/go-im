@@ -9,5 +9,7 @@ func CreateTable() {
 	appInit.DB.AutoMigrate(
 		//!!do not delete the line, gen generate code at here
 		&model.User{},
+		&model.Contact{},
+		&model.Community{},
 	)
 }

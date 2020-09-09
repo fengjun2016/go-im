@@ -38,7 +38,7 @@ func UploadLocal(writer http.ResponseWriter, request *http.Request) {
 	}
 	filename := fmt.Sprintf("%d%s%s", time.Now().Unix(), util.GenRandomStr(32), suffix)
 	//创建文件
-	filepath := "./resource/" + filename
+	filepath := "../resource/" + filename
 	dstfile, err := os.Create(filepath)
 	if err != nil {
 		util.RespFail(writer, err.Error())

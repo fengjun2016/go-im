@@ -83,6 +83,13 @@ func (us *UserService) Login(mobile, plainpwd string) (user model.User, err erro
 	return user, err
 }
 
+//根据名字搜索社群
+func (us *UserService) SearchUserByName(mobile string) (user model.User, err error) {
+	user.Mobile = mobile
+	err = user.GetByName()
+	return
+}
+
 //查找某个用户
 func (s *UserService) Find(userId string) (user model.User, err error) {
 	user.Id = userId

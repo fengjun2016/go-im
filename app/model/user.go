@@ -55,6 +55,7 @@ func (u *User) ExistUserByMobile() (exists bool, err error) {
 
 func (u *User) Create() (err error) {
 	err = appInit.DB.
+		Model(&User{}).
 		Create(u).
 		Error
 
@@ -63,6 +64,7 @@ func (u *User) Create() (err error) {
 
 func (u *User) Get() (err error) {
 	err = appInit.DB.
+		Model(&User{}).
 		Where("id = ?", u.Id).
 		First(u).
 		Error
@@ -71,6 +73,7 @@ func (u *User) Get() (err error) {
 
 func (u *User) GetByName() (err error) {
 	err = appInit.DB.
+		Model(&User{}).
 		Where("mobile = ?", u.Mobile).
 		First(u).
 		Error
@@ -80,6 +83,7 @@ func (u *User) GetByName() (err error) {
 
 func (u *User) Update(where, update map[string]interface{}) (err error) {
 	err = appInit.DB.
+		Model(&User{}).
 		Where("id = ?", u.Id).
 		Where(where).
 		Updates(update).
@@ -90,6 +94,7 @@ func (u *User) Update(where, update map[string]interface{}) (err error) {
 
 func FindInUsers(inUsers []string) (users []*User, err error) {
 	err = appInit.DB.
+		Model(&User{}).
 		Where("id in (?)", inUsers).
 		Find(&users).
 		Error
@@ -101,7 +106,7 @@ func (u *User) List(rawQuery string, rawOrder string, offset int, limit int) ([]
 	users := make([]*User, 0)
 	total := 0
 
-	db := appInit.DB
+	db := appInit.DB.Model(&User{})
 
 	db, err := buildWhere(rawQuery, db)
 	if err != nil {

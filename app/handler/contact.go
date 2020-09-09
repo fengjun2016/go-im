@@ -7,6 +7,8 @@ import (
 	"go-im/app/util"
 	"log"
 	"net/http"
+
+	"github.com/sirupsen/logrus"
 )
 
 var contactService service.ContactService
@@ -15,9 +17,11 @@ var contactService service.ContactService
 func AddFriend(writer http.ResponseWriter, request *http.Request) {
 	var arg args.AddNewMember
 	util.Bind(request, &arg)
-	friend, err := contactService.SearchFriendByName(arg.DstName)
+	logrus.Println("args add friend", arg)
+	friend, err := userService.SearchUserByName(arg.DstName)
 	if friend.Id == "" || err != nil {
 		util.RespFail(writer, "您要添加的好友不存在")
+		return
 	} else {
 		//调用service
 		err := contactService.AddFriend(arg.Userid, friend.Id)
@@ -46,9 +50,11 @@ func CreateCommunity(w http.ResponseWriter, req *http.Request) {
 	var arg model.Community
 	//如果这个用的上,那么可以直接
 	util.Bind(req, &arg)
+	logrus.Println("args", arg.Ownerid)
 	com, err := contactService.CreateCommunity(arg)
 	if err != nil {
 		util.RespFail(w, err.Error())
+		return
 	} else {
 		util.RespOk(w, com, "")
 	}
@@ -63,6 +69,7 @@ func JoinCommunity(w http.ResponseWriter, req *http.Request) {
 	com, err := contactService.SearchCommunityByName(arg.DstName)
 	if com.Id == "" || err != nil {
 		util.RespFail(w, "您要加入的群不存在")
+		return
 	} else {
 		log.Printf("community id:%d", com.Id)
 		err := contactService.JoinCommunity(arg.Userid, com.Id)
@@ -70,6 +77,7 @@ func JoinCommunity(w http.ResponseWriter, req *http.Request) {
 		// AddGroupId(arg.Userid, com.Id)
 		if err != nil {
 			util.RespFail(w, err.Error())
+			return
 		} else {
 			util.RespOk(w, nil, "")
 		}

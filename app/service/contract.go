@@ -123,7 +123,7 @@ func (c *ContactService) CreateCommunity(comm model.Community) (ret model.Commun
 		err = errors.New("缺少群名称")
 		return ret, err
 	}
-	if comm.Ownerid != "" {
+	if comm.Ownerid == "" {
 		err = errors.New("请先登录")
 		return ret, err
 	}
