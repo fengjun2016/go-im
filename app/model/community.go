@@ -49,6 +49,7 @@ func (c *Community) CountCommunitys() (count int, err error) {
 }
 
 func FindInCommunitys(incommunitys []string) (coms []*Community, err error) {
+	coms = make([]*Community, 0)
 	err = appInit.DB.
 		Where("id in (?)", incommunitys).
 		Find(&coms).

@@ -65,6 +65,7 @@ func CheckFriendRelationShip(ownId, dstId string) (friend *Contact, err error) {
 }
 
 func CheckCommunityRelationShip(ownId, comId string) (com *Contact, err error) {
+	com = new(Contact)
 	err = appInit.DB.
 		Where("ownerid = ?", ownId).
 		Where("dstobj = ?", comId).

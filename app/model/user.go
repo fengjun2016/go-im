@@ -93,6 +93,7 @@ func (u *User) Update(where, update map[string]interface{}) (err error) {
 }
 
 func FindInUsers(inUsers []string) (users []*User, err error) {
+	users = make([]*User, 0)
 	err = appInit.DB.
 		Model(&User{}).
 		Where("id in (?)", inUsers).

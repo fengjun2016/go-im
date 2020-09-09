@@ -145,9 +145,10 @@ func (c *ContactService) CreateCommunity(comm model.Community) (ret model.Commun
 //用户加群
 func (c *ContactService) JoinCommunity(userId, comId string) error {
 	cot := model.Contact{
-		Ownerid: userId,
-		Dstobj:  comId,
-		Cate:    model.ConcatCateComunity,
+		Ownerid:  userId,
+		Dstobj:   comId,
+		Cate:     model.ConcatCateComunity,
+		Createat: time.Now(),
 	}
 
 	//检查是否已经存在过加群记录
