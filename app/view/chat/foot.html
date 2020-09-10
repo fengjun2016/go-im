@@ -38,7 +38,7 @@
                         choosed: {"pkgid": "emoj", "assets": [], "size": "small"}
                     },
                     msglist: [],
-
+                    initMsgList: [],
                     msgcontext: {
                         dstid: 10,
                         cmd: 10,
@@ -198,6 +198,8 @@
                         this.title = "和" + user.nickname + "聊天中";
                         this.msgcontext.dstid = user.id;
                         this.msgcontext.cmd = 10;
+                        // this.loadInitPersonalMsgList()
+                        // this.showmsg(userInfo(), []);
                     },
                     groupmsg: function (group) {
                         this.win = "group";
@@ -249,6 +251,14 @@
                     },
                     sendmsg: function () {
 
+                    },
+                    loadInitPersonalMsgList: function() {
+                        var that = this;
+                        post("message/loadmsg", {userid: userId()}, function (res) {
+                            that.msglist = res.rows || [];
+                            // that.msglist = that.msglist.concat(that.initMsgList)
+                            console.log('msg list', that.msglist)
+                        }.bind(this))
                     },
                     loadfriends: function () {
                         var that = this;

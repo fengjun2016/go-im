@@ -36,6 +36,19 @@ func (m *Message) Create() (err error) {
 	return
 }
 
+func (m *Message) SearchPersonalMessage() ([]*Message, error) {
+	msgs := make([]*Message, 0)
+
+	err := appInit.DB.Model(&Message{}).
+		Where("cmd = ?", m.Cmd).
+		Where("dstid = ?", m.Dstid).
+		Order("createat desc").
+		Find(&msgs).
+		Error
+
+	return msgs, err
+}
+
 func (m *Message) List(rawQuery string, rawOrder string, offset int, limit int) ([]*Message, int, error) {
 	msgs := make([]*Message, 0)
 	total := 0
