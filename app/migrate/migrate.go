@@ -11,5 +11,6 @@ func CreateTable() {
 		&model.User{},
 		&model.Contact{},
 		&model.Community{},
+		&model.Message{},
 	)
 }

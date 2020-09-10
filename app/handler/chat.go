@@ -3,6 +3,8 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"go-im/app/model"
+	"go-im/app/service"
 	"net/http"
 	"sync"
 	"time"
@@ -40,6 +42,22 @@ type Message struct {
 	Amount  int    `json:"amount,omitempty" form:"amount"`   //其他和数字相关的
 }
 
+//userid 和 node 的 映射关系
+var clientMap map[string]*Node = make(map[string]*Node, 0)
+
+//读写锁
+var rwlocker sync.RWMutex
+
+//消息存储 持久化服务
+var messageService service.MessageService
+
+var msgData chan Message
+
+func init() {
+	//消息存储缓冲通道 初始化
+	msgData = make(chan Message, 10000)
+}
+
 //后端调度逻辑处理
 func dispatch(data []byte) {
 	msg := Message{}
@@ -61,13 +79,10 @@ func dispatch(data []byte) {
 	case CmdHeart:
 		//检查 客户端的心跳
 	}
+
+	//离线消息 持久化存储 不保证
+	msgData <- msg
 }
-
-//userid 和 node 的 映射关系
-var clientMap map[string]*Node = make(map[string]*Node, 0)
-
-//读写锁
-var rwlocker sync.RWMutex
 
 //添加新的群ID到用户的groupset中
 func AddGroupId(userId, gid string) {
@@ -129,6 +144,9 @@ func Chat(rw http.ResponseWriter, req *http.Request) {
 	//启动一个协程，每隔1s向客户端发送一次心跳消息
 	go heartbeat(node)
 
+	//处理消息 持久化 存储
+	go loadToDb()
+
 	sendMsg(userId, []byte("welcome!"))
 }
 
@@ -183,5 +201,28 @@ func sendMsg(userId string, msg []byte) {
 	rwlocker.RUnlock()
 	if ok {
 		node.DataQueue <- msg
+	}
+}
+
+//消息的持久化存储
+func loadToDb() {
+	var timeLocal, _ = time.LoadLocation("Asia/Chongqing")
+	for {
+		select {
+		case msg := <-msgData:
+			msgModel := model.Message{}
+			msgModel.Userid = msg.Userid
+			msgModel.Cmd = msg.Cmd
+			msgModel.Dstid = msg.Dstid
+			msgModel.Media = msg.Media
+			msgModel.Content = msg.Content
+			msgModel.Pic = msg.Pic
+			msgModel.Url = msg.Url
+			msgModel.Memo = msg.Memo
+			msgModel.Amount = msg.Amount
+			msgModel.Createat = time.Now().In(timeLocal)
+
+			messageService.LoadToDb(msgModel)
+		}
 	}
 }
