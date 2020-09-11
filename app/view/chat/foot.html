@@ -32,7 +32,7 @@
                     doutu: {
                         config: {
                             "baseurl": "/asset/plugins/doutu/",
-                            "pkgids": ["mkgif", "emoj"]
+                            "pkgids": ["mrjin", "emoj"]
                         },
                         packages: [],
                         choosed: {"pkgid": "emoj", "assets": [], "size": "small"}
@@ -194,15 +194,16 @@
                     },
                     singlemsg: function (user) {
                         console.log(user)
+                        this.loadInitPersonalMsgList(user.id)
                         this.win = "single";
                         this.title = "和" + user.nickname + "聊天中";
                         this.msgcontext.dstid = user.id;
                         this.msgcontext.cmd = 10;
-                        // this.loadInitPersonalMsgList()
                         // this.showmsg(userInfo(), []);
                     },
                     groupmsg: function (group) {
                         this.win = "group";
+                        this.loadInitCommunityMsgList(group.id)
                         this.title = group.name;
                         this.msgcontext.dstid = group.id;
                         this.msgcontext.cmd = 11;
@@ -252,13 +253,47 @@
                     sendmsg: function () {
 
                     },
-                    loadInitPersonalMsgList: function() {
+                    loadInitPersonalMsgList: function(dstid) {
                         var that = this;
-                        post("message/loadmsg", {userid: userId()}, function (res) {
-                            that.msglist = res.rows || [];
-                            // that.msglist = that.msglist.concat(that.initMsgList)
-                            console.log('msg list', that.msglist)
-                        }.bind(this))
+                        post("message/loadmsg", {userid: userId(), dstid: dstid}, function (res) {
+                             for (var i in res.rows) {
+                               var msg = that.createmsgcontext();
+                                console.log("txt msg", msg)
+                                msg.media = res.rows[i].media;
+                                msg.content = res.rows[i].content;
+                                msg.cmd = res.rows[i].cmd;
+                                msg.userid = res.rows[i].userid;
+                                msg.dstid = res.rows[i].dstid;
+                                msg.url = res.rows[i].url;
+
+                                var data = {}
+                                data.ismine = userId() == msg.userid;
+                                data.user = userInfo();
+                                data.msg = msg;
+                                that.msglist = that.msglist.concat(data)
+                            }
+                        })
+                    },
+                    loadInitCommunityMsgList: function(dstid) {
+                        var that = this;
+                        post("message/loadmsg-community", {userid: userId(), dstid: dstid}, function (res) {
+                             for (var i in res.rows) {
+                               var msg = that.createmsgcontext();
+                                console.log("txt msg", msg)
+                                msg.media = res.rows[i].media;
+                                msg.content = res.rows[i].content;
+                                msg.cmd = res.rows[i].cmd;
+                                msg.userid = res.rows[i].userid;
+                                msg.dstid = res.rows[i].dstid;
+                                msg.url = res.rows[i].url;
+
+                                var data = {}
+                                data.ismine = userId() == msg.userid;
+                                data.user = userInfo();
+                                data.msg = msg;
+                                that.msglist = that.msglist.concat(data)
+                            }
+                        })
                     },
                     loadfriends: function () {
                         var that = this;

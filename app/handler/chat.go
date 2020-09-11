@@ -79,9 +79,6 @@ func dispatch(data []byte) {
 	case CmdHeart:
 		//检查 客户端的心跳
 	}
-
-	//离线消息 持久化存储 不保证
-	msgData <- msg
 }
 
 //添加新的群ID到用户的groupset中
@@ -169,6 +166,16 @@ func recvproc(node *Node) {
 		dispatch(data)
 		//todo 对 data进一步处理
 		fmt.Printf("recv<=%s", data)
+
+		//离线消息 持久化存储 不保证
+		msg := Message{}
+		err = json.Unmarshal(data, &msg)
+		if err != nil {
+			logrus.Println(err.Error())
+			return
+		}
+
+		msgData <- msg
 	}
 }
 

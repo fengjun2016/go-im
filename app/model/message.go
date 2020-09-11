@@ -41,8 +41,21 @@ func (m *Message) SearchPersonalMessage() ([]*Message, error) {
 
 	err := appInit.DB.Model(&Message{}).
 		Where("cmd = ?", m.Cmd).
+		Where("(dstid = ? and userid = ?) or (userid = ? and dstid = ?)", m.Dstid, m.Userid, m.Dstid, m.Userid).
+		Order("createat asc").
+		Find(&msgs).
+		Error
+
+	return msgs, err
+}
+
+func (m *Message) SearchCommunityMessage() ([]*Message, error) {
+	msgs := make([]*Message, 0)
+
+	err := appInit.DB.Model(&Message{}).
+		Where("cmd = ?", m.Cmd).
 		Where("dstid = ?", m.Dstid).
-		Order("createat desc").
+		Order("createat asc").
 		Find(&msgs).
 		Error
 
